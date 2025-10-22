@@ -1,10 +1,10 @@
+use crate::error::{bhomz_error, BhomzThrowable};
 use chrono::Local;
 use colored::Colorize;
 use log::{trace, LevelFilter, Log, Metadata, Record};
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use crate::error::{bhomz_error, BhomzThrowable};
 
 static mut LOGGER: Logger = Logger { file: None };
 
@@ -14,8 +14,12 @@ static mut LOGGER: Logger = Logger { file: None };
 pub fn refresh(level: LevelFilter, log_file: Option<PathBuf>) -> BhomzThrowable {
 	if let Some(file) = &log_file {
 		let log_directory = file.parent().unwrap();
-		if let Err(err) = create_dir_all(&log_directory) {
-			let msg = format!("Failed to create {} directory: {err}", log_directory.display()).red();
+		if let Err(err) = create_dir_all(log_directory) {
+			let msg = format!(
+				"Failed to create {} directory: {err}",
+				log_directory.display()
+			)
+			.red();
 			println!("{msg}");
 			return Err(bhomz_error(msg));
 		}
@@ -24,7 +28,7 @@ pub fn refresh(level: LevelFilter, log_file: Option<PathBuf>) -> BhomzThrowable 
 			.create(true)
 			.truncate(false)
 			.write(true)
-			.open(&file)
+			.open(file)
 		{
 			let msg = format!("Failed to create {}: {err}", &file.display()).red();
 			println!("{msg}");
@@ -103,9 +107,9 @@ fn log(record: &Record) -> String {
 
 #[macro_export]
 macro_rules! log_err {
-    ($message:expr, $error:ty) => {{
+	($message:expr, $error:ty) => {{
 		let msg = format!("{}", $message);
 		log::error!("{}", msg);
 		Err(<$error as From<String>>::from(msg))
-    }};
+	}};
 }

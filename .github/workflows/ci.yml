@@ -25,11 +25,14 @@ jobs:
       - name: "Setup: Rust"
         uses: dtolnay/rust-toolchain@stable
 
-      - name: "Rust: Clippy"
-        run: cargo clippy -- -D warnings
-
       - name: "Rust: Build"
         run: cargo build --release
 
       - name: "Rust: Test"
         run: cargo test
+
+      - name: "Rust: Clippy"
+        run: cargo clippy -- -D warnings
+
+      - name: "Rust: Format"
+        run: cargo fmt --check

@@ -16,12 +16,16 @@ impl Error for BhomzError {}
 
 #[inline(always)]
 pub fn bhomz_error(msg: impl ToString) -> BhomzError {
-	BhomzError { msg: msg.to_string() }
+	BhomzError {
+		msg: msg.to_string(),
+	}
 }
 
 #[inline(always)]
 pub fn bhomz_error_borrow(msg: &impl ToString) -> BhomzError {
-	BhomzError { msg: msg.to_string() }
+	BhomzError {
+		msg: msg.to_string(),
+	}
 }
 
 pub type BhomzResult<T> = Result<T, BhomzError>;
