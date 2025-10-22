@@ -1,13 +1,5 @@
 use std::fmt::{Display, Formatter, Pointer};
 
-pub fn cstr_ptr(s: &str) -> *const std::os::raw::c_char {
-	std::ffi::CString::new(s).unwrap().into_raw()
-}
-
-pub fn cstring_ptr(s: &String) -> *const std::os::raw::c_char {
-	std::ffi::CString::new(s.as_str()).unwrap().into_raw()
-}
-
 pub trait ToCCharPtr
 where 
     Self: ToString
@@ -17,7 +9,7 @@ where
     }
 }
 
-
+impl<T: ToString> ToCCharPtr for T {}
 
 pub struct Printable {
 	s: *const std::os::raw::c_char

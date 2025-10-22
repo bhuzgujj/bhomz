@@ -1,0 +1,35 @@
+name: rust
+
+on:
+  push:
+    branches:
+      - trunk
+
+jobs:
+  ci:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'windows-latest'
+            args: ''
+        # TODO: Linux
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: "Setup: Repo"
+        uses: actions/checkout@v4
+
+      - name: "Setup: Rust"
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: "Rust: Clippy"
+        run: cargo clippy -- -D warnings
+
+      - name: "Rust: Build"
+        run: cargo build --release
+
+      - name: "Rust: Test"
+        run: cargo test
