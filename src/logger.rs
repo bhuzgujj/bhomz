@@ -113,3 +113,17 @@ macro_rules! log_err {
 		Err(<$error as From<String>>::from(msg))
 	}};
 }
+
+#[cfg(test)]
+mod tests {
+	use crate::error::{bhomz_error, BhomzError, BhomzResult};
+
+	const ERR_MSG: &'static str = "error";
+
+	#[test]
+	fn bhomz_error_can_be_used_in_log_error() {
+		let expected: BhomzResult<()> = Err(bhomz_error(ERR_MSG));
+		let result: BhomzResult<()> = log_err!(ERR_MSG, BhomzError);
+		assert_eq!(expected, result);
+	}
+}

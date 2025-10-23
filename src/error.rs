@@ -1,9 +1,16 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
+#[derive(PartialOrd, PartialEq)]
 #[derive(Debug)]
 pub struct BhomzError {
 	msg: String,
+}
+
+impl From<String> for BhomzError {
+	fn from(value: String) -> Self {
+		Self { msg: value }
+	}
 }
 
 impl Display for BhomzError {
