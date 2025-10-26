@@ -1,2 +1,2 @@
-mod two_dimension;
-mod three_dimension;
+pub mod two_dimension;
+pub mod three_dimension;
