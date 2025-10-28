@@ -14,8 +14,16 @@ jobs:
       matrix:
         include:
           - platform: 'windows-latest'
-            args: ''
-        # TODO: Linux
+            features: ''
+
+          - platform: 'windows-latest'
+            features: '--features=anyhow'
+
+          - platform: 'ubuntu-latest'
+            features: ''
+
+          - platform: 'ubuntu-latest'
+            features: '--features=anyhow'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -26,13 +34,16 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: "Rust: Build"
-        run: cargo build --release
+        run: cargo build --release ${{ matrix.features }}
 
       - name: "Rust: Test"
-        run: cargo test
+        run: cargo test ${{ matrix.features }}
+
+      - name: "Rust: Test Docs"
+        run: cargo test --doc ${{ matrix.features }}
 
       - name: "Rust: Clippy"
-        run: cargo clippy -- -D warnings
+        run: cargo clippy ${{ matrix.features }} -- -D warnings
 
       - name: "Rust: Format"
         run: cargo fmt --check

@@ -1,9 +1,15 @@
 [package]
 name = "bhomz"
-version = "0.1.4"
+version = "1.0.0"
 edition = "2024"
+authors = ["Émile Boucher <emileboucheracc@gmail.com>"]
+license = "MIT"
+
+[features]
+anyhow = []
 
 [dependencies]
+anyhow = "1.0.100"
 chrono = "0.4.42"
 colored = "3.0.0"
 log = "0.4.28"

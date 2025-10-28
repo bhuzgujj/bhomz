@@ -105,25 +105,130 @@ fn log(record: &Record) -> String {
 	)
 }
 
+/// Log an error at the function calling the macro and create a returnable error
+///
+/// It can take a string directly
+/// ```
+/// use bhomz::error::{BhomzResult, BhomzError};
+/// use bhomz::log_err;
+///
+/// fn function_call(string: String) -> BhomzResult<()> {
+///   if (string.len() > 6) {
+///     return log_err!(BhomzError, "String too long");
+///   }
+///   return Ok(())
+/// }
+/// ```
+///
+/// It can be used like `format!()`
+/// ```
+/// use bhomz::error::{BhomzResult, BhomzError};
+/// use bhomz::log_err;
+///
+/// fn function_call(string: String) -> BhomzResult<()> {
+///   if (string.len() > 6) {
+///     return log_err!(BhomzError, "String should be under {} characters", 6);
+///   }
+///   return Ok(())
+/// }
+/// ```
+#[cfg(not(feature = "anyhow"))]
 #[macro_export]
 macro_rules! log_err {
-	($message:expr, $error:ty) => {{
+	($error:ty, $message:expr) => {{
 		let msg = format!("{}", $message);
+		log::error!("{}", msg);
+		Err(<$error as From<String>>::from(msg))
+	}};
+	($error:ty, $($arg:expr),*) => {{
+		let msg = format!($($arg),*);
 		log::error!("{}", msg);
 		Err(<$error as From<String>>::from(msg))
 	}};
 }
 
+/// Log an error at the function calling the macro and create a returnable error
+///
+/// It can take a string directly
+/// ```
+/// use bhomz::error::BhomzResult;
+/// use bhomz::log_err;
+///
+/// fn function_call(string: String) -> BhomzResult<()> {
+///   if (string.len() > 6) {
+///     return log_err!("String too long");
+///   }
+///   return Ok(())
+/// }
+/// ```
+///
+/// It can be used like `format!()`
+/// ```
+/// use bhomz::error::BhomzResult;
+/// use bhomz::log_err;
+///
+/// fn function_call(string: String) -> BhomzResult<()> {
+///   if (string.len() > 6) {
+///     return log_err!("String should be under {} characters", 6);
+///   }
+///   return Ok(())
+/// }
+/// ```
+/// *Note: the error will be an anyhow error wrapped in a type aliases*
+#[cfg(feature = "anyhow")]
+#[macro_export]
+macro_rules! log_err {
+	($message:expr) => {{
+		log::error!("{}", $message);
+		Err(anyhow::Error::msg($message))
+	}};
+	($($arg:expr),*) => {{
+		let msg = format!($($arg),*);
+		log::error!("{}", msg);
+		Err(anyhow::Error::msg(msg))
+	}};
+}
+
 #[cfg(test)]
 mod tests {
-	use crate::error::{bhomz_error, BhomzError, BhomzResult};
+	use crate::error::{bhomz_error, BhomzResult};
 
-	const ERR_MSG: &'static str = "error";
+	#[cfg(not(feature = "anyhow"))]
+	use crate::error::BhomzError;
+
+	const ERR_MSG: &str = "error";
 
 	#[test]
 	fn bhomz_error_can_be_used_in_log_error() {
-		let expected: BhomzResult<()> = Err(bhomz_error(ERR_MSG));
-		let result: BhomzResult<()> = log_err!(ERR_MSG, BhomzError);
-		assert_eq!(expected, result);
+		let expected = bhomz_error(ERR_MSG);
+
+		#[cfg(not(feature = "anyhow"))]
+		let result: BhomzResult<()> = log_err!(BhomzError, ERR_MSG);
+		#[cfg(feature = "anyhow")]
+		let result: BhomzResult<()> = log_err!(ERR_MSG);
+
+		assert!(result.is_err());
+		if let Some(res) = result.err() {
+			assert_eq!(expected.to_string(), res.to_string());
+		} else {
+			panic!("Error was not an error");
+		}
+	}
+
+	#[test]
+	fn bhomz_error_can_be_templated() {
+		let expected = bhomz_error(format!("{} {}", "is", "or not"));
+
+		#[cfg(not(feature = "anyhow"))]
+		let result: BhomzResult<()> = log_err!(BhomzError, "{} {}", "is", "or not");
+		#[cfg(feature = "anyhow")]
+		let result: BhomzResult<()> = log_err!("{} {}", "is", "or not");
+
+		assert!(result.is_err());
+		if let Some(res) = result.err() {
+			assert_eq!(expected.to_string(), res.to_string());
+		} else {
+			panic!("Error was not an error");
+		}
 	}
 }
