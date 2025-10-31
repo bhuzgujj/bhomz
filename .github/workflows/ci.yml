@@ -12,18 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: 'windows-latest'
-            features: ''
-
-          - platform: 'windows-latest'
-            features: '--features=anyhow'
-
-          - platform: 'ubuntu-latest'
-            features: ''
-
-          - platform: 'ubuntu-latest'
-            features: '--features=anyhow'
+        platform: [ 'windows-latest', 'ubuntu-latest' ]
+        features: [ '', '--features=anyhows' ]
 
     runs-on: ${{ matrix.platform }}
     steps:
